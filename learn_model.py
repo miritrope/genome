@@ -232,7 +232,7 @@ def execute():
 
 
 
-    print('End')
+    print('Training End')
 
 
 def main():
