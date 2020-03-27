@@ -1,9 +1,7 @@
 import thousand_genomes
 import numpy as np
 import os
-#  main purpose: loading data and manipulate it: shuffling and splitting
-
-# 'data/affy_6_biallelic_snps_maf005_thinned_aut_dataset.pkl'
+# main purpose: loading data and manipulate its values by shuffling and splitting
 
 
 def shuffle(data_sources, seed=23):
@@ -75,7 +73,7 @@ def load_1000_genomes(data_path, raw_path, fold=0):
     valid[0] = (valid[0] - mu[None, :]) / sigma[None, :]
     test[0] = (test[0] - mu[None, :]) / sigma[None, :]
 
-    #supervised vector
+    # supervised vector
     sup = [train, valid, test]
     print('loaded supervised data')
     return sup
