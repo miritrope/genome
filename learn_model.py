@@ -26,10 +26,8 @@ def execute():
     n_hidden_u = 100
     n_hidden_t_enc = 100
     n_targets = 26
-    num_epochs = 3000
-    batch_size = 80
+    num_epochs = 300
     patience = 50
-
 
     print("Loading data")
     x_train, y_train, x_valid, y_valid, x_test, y_test, \
@@ -37,24 +35,23 @@ def execute():
 
     print('declares shared veriables')
     feat_emb = Variable(torch.from_numpy(x_unsup), requires_grad=True)
-    # feat_emb size: 315K x 104
+    # feat_emb size: n_feats x 104
     n_feats = feat_emb.shape[1]
-
 
     print("Building embedding model")
     emb_model = mh.feat_emb_net(n_feats, n_hidden_u, n_hidden_t_enc)
     embedding = emb_model(feat_emb)
-    # embedding size: 315K x 100
+    # embedding size: n_feats x n_hidden_t_enc
 
     # transpose to fit the weights in the discriminative network
     embedding = torch.transpose(embedding, 1, 0)
-
 
     print("Building discrim model")
     discrim_model = mh.discrim_net(embedding, feat_emb.shape[0], n_hidden_u, n_hidden_t_enc, n_targets)
     print("Done building discrim model")
 
-    # input_discrim size: 80, 315K
+    # some comments:
+    # input_discrim size: batch_size, n_feats
     # input_discrim = Variable(torch.randn(batch_size, feat_emb.shape[0]).type(dtype), requires_grad=False)
     # y_pred = discrim_model(input_discrim)
 
@@ -69,7 +66,6 @@ def execute():
 
     # Finally, launch the training loop.
     print("Starting training...")
-
     train_minibatches = list(mlh.iterate_minibatches(x_train, y_train,
                                                      batch_size))
     valid_minibatches = list(mlh.iterate_minibatches(x_valid, y_valid,
@@ -82,27 +78,23 @@ def execute():
     train_step = mh.make_train_step(discrim_model, loss_fn, optimizer)
     epoch_len = len(str(num_epochs))
 
-    train_losses_per_batch = []
-    valid_losses_per_batch = []
+    train_losses = []
+    valid_losses = []
 
     for epoch in range(num_epochs):
         print("Epoch {} of {}".format(epoch + 1, num_epochs))
 
-        train_batch_losses = []
-        valid_batch_losses = []
-
+        train_loss = 0.0
         for x_batch, y_batch in train_minibatches:
             x_train = Variable(torch.from_numpy(x_batch))
             y_train = Variable(torch.from_numpy(y_batch))
 
             loss = train_step(x_train, y_train)
-            # vector of losses per batch
-            train_batch_losses.append(loss)
-
-        train_losses_per_batch.append(np.average(train_batch_losses))
+            train_loss += loss * batch_size
 
         discrim_model.eval()
 
+        valid_loss = 0.0
         with torch.no_grad():
             for x_val, y_val in valid_minibatches:
                 x_val = Variable(torch.from_numpy(x_val))
@@ -110,20 +102,26 @@ def execute():
 
                 yhat = discrim_model(x_val)
                 loss = loss_fn(y_val, yhat)
-                valid_batch_losses.append(loss.item())
 
-            valid_losses_per_batch.append(np.average(valid_batch_losses))
+                valid_loss += loss.item() * batch_size
 
         # finished a batch
+
+        train_loss = train_loss / len(train_minibatches)
+        valid_loss = valid_loss / len(valid_minibatches)
+
+        train_losses.append(train_loss)
+        valid_losses.append(valid_loss)
+
         print_msg = (f'[{epoch:>{epoch_len}}/{num_epochs:>{epoch_len}}] ' +
-                     f'train_loss: {train_losses_per_batch[epoch]:.5f} ' +
-                     f'valid_loss: {valid_losses_per_batch[epoch]:.5f}')
+                     f'train_loss: {train_loss:.5f} ' +
+                     f'valid_loss: {valid_loss:.5f}')
 
         print(print_msg)
 
         # early_stopping needs the validation loss to check if it has decresed,
         # and if it has, it will make a checkpoint of the current model
-        early_stopping(valid_losses_per_batch[epoch], discrim_model)
+        early_stopping(valid_loss, discrim_model)
 
         if early_stopping.early_stop:
             print("Early stopping")
@@ -134,16 +132,16 @@ def execute():
 
     # visualize the loss
     fig = plt.figure(figsize=(10, 8))
-    plt.plot(range(1, len(train_losses_per_batch) + 1), train_losses_per_batch, label='Training Loss')
-    plt.plot(range(1, len(valid_losses_per_batch) + 1), valid_losses_per_batch, label='Validation Loss')
+    plt.plot(range(1, len(train_losses) + 1), train_losses, label='Training Loss')
+    plt.plot(range(1, len(valid_losses) + 1), valid_losses, label='Validation Loss')
 
     # find position of lowest validation loss
-    minposs = valid_losses_per_batch.index(min(valid_losses_per_batch)) + 1
+    minposs = valid_losses.index(min(valid_losses)) + 1
     plt.axvline(minposs, linestyle='--', color='r', label='Early Stopping Checkpoint')
     plt.xlabel('epochs')
     plt.ylabel('loss')
-    plt.xlim(0, len(train_losses_per_batch) + 1)  # consistent scale
-    plt.ylim(0, 0.04)  # consistent scale
+    plt.xlim(0, len(train_losses) + 1)  # consistent scale
+    plt.ylim(0, 3)  # consistent scale
     plt.grid(True)
     plt.legend()
     plt.tight_layout()
@@ -172,7 +170,7 @@ def execute():
         # compare predictions to true label
         y_test = np.argmax(y_test.data, axis=1)
 
-        # correct size: [80]
+        # correct size: [batch_size]
         correct = np.squeeze(pred.eq(y_test.view_as(pred)))
         # calculate test accuracy for each object class
         y_test = y_test.tolist()
