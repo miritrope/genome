@@ -42,20 +42,6 @@ class discrim_net(nn.Module):
         return y
 
 
-#     # discrim_net = InputLayer((batch_size, n_feats), input_var_sup)
-#     # discrim_net = DenseLayer(discrim_net, n_hidden_t_enc,
-#     #                          W=embedding, nonlinearity=rectify)
-#     # discrim_net = BatchNormLayer(discrim_net)
-#     # discrim_net = DropoutLayer(discrim_net)
-#     # discrim_net = DenseLayer(discrim_net, num_units=hid)
-#     # discrim_net = BatchNormLayer(discrim_net)
-#     # discrim_net = DropoutLayer(discrim_net)
-#     # discrim_net = DenseLayer(discrim_net, num_units=n_targets,
-#     #     nonlinearity=eval(disc_nonlinearity))
-#
-#     return discrim_net
-
-
 def make_train_step(model, loss_fn, optimizer):
     # Builds function that performs a step in the train loop
     def train_step(x, y):
