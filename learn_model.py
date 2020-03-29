@@ -17,7 +17,7 @@ _EPSILON = 10e-8
 
 def execute():
     fold = 0
-    embedding_source = 'histo3x26_fold'
+    embedding_source = 'embed_4x26_fold'
     raw_path = 'affy_6_biallelic_snps_maf005_thinned_aut_dataset.pkl'
     dataset_path = 'data/'
     batch_size = 80
@@ -25,8 +25,8 @@ def execute():
     n_hidden_u = 100
     n_hidden_t_enc = 100
     n_targets = 26
-    num_epochs = 1500
-    patience = 300
+    num_epochs = 500
+    patience = 30
 
     print("Load data")
     x_train, y_train, x_valid, y_valid, x_test, y_test, \

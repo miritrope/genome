@@ -44,8 +44,9 @@ def split(data_sources, splits):
     return split_data_sources
 
 
-def load_1000_genomes(data_path, raw_path, fold=0):
+def load_1000_genomes(data_path, raw_path, norm=True, fold=0):
     x, y = thousand_genomes.load_data(data_path + raw_path)
+    #  x stands for the genomic data and y its labels
     x = x.astype("float32")
 
     # Shuffle the 1k genome raw data
@@ -68,11 +69,12 @@ def load_1000_genomes(data_path, raw_path, fold=0):
     train, valid = split([x, y], [0.75])
     # .75 train .25 valid
 
-    mu = x.mean(axis=0)
-    sigma = x.std(axis=0)
-    train[0] = (train[0] - mu[None, :]) / sigma[None, :]
-    valid[0] = (valid[0] - mu[None, :]) / sigma[None, :]
-    test[0] = (test[0] - mu[None, :]) / sigma[None, :]
+    if norm:
+        mu = x.mean(axis=0)
+        sigma = x.std(axis=0)
+        train[0] = (train[0] - mu[None, :]) / sigma[None, :]
+        valid[0] = (valid[0] - mu[None, :]) / sigma[None, :]
+        test[0] = (test[0] - mu[None, :]) / sigma[None, :]
 
     # supervised vector
     sup = [train, valid, test]
