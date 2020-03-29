@@ -8,7 +8,6 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 import numpy as np
 import matplotlib.pyplot as plt
-
 from pytorchtools import EarlyStopping
 import mainloop_helpers as mlh
 import model_helpers as mh
@@ -26,19 +25,20 @@ def execute():
     n_hidden_u = 100
     n_hidden_t_enc = 100
     n_targets = 26
-    num_epochs = 300
-    patience = 50
+    num_epochs = 1500
+    patience = 300
 
-    print("Loading data")
+    print("Load data")
     x_train, y_train, x_valid, y_valid, x_test, y_test, \
     x_unsup, training_labels = mlh.load_data(dataset_path, raw_path, embedding_source, fold)
 
-    print('declares shared veriables')
+    # Declare shared veriables
     feat_emb = Variable(torch.from_numpy(x_unsup), requires_grad=True)
     # feat_emb size: n_feats x 104
     n_feats = feat_emb.shape[1]
 
-    print("Building embedding model")
+    print('Build models')
+    # Build embedding model
     emb_model = mh.feat_emb_net(n_feats, n_hidden_u, n_hidden_t_enc)
     embedding = emb_model(feat_emb)
     # embedding size: n_feats x n_hidden_t_enc
@@ -46,9 +46,8 @@ def execute():
     # transpose to fit the weights in the discriminative network
     embedding = torch.transpose(embedding, 1, 0)
 
-    print("Building discrim model")
+    # Build discrim model
     discrim_model = mh.discrim_net(embedding, feat_emb.shape[0], n_hidden_u, n_hidden_t_enc, n_targets)
-    print("Done building discrim model")
 
     # some comments:
     # input_discrim size: batch_size, n_feats
@@ -65,7 +64,7 @@ def execute():
     #         updates[k] = lasagne.updates.norm_constraint(updates[k], 1.0)
 
     # Finally, launch the training loop.
-    print("Starting training...")
+    print("Start training ...")
     train_minibatches = list(mlh.iterate_minibatches(x_train, y_train,
                                                      batch_size))
     valid_minibatches = list(mlh.iterate_minibatches(x_valid, y_valid,
@@ -141,7 +140,7 @@ def execute():
     plt.xlabel('epochs')
     plt.ylabel('loss')
     plt.xlim(0, len(train_losses) + 1)  # consistent scale
-    plt.ylim(0, 3)  # consistent scale
+    plt.ylim(0, 4)  # consistent scale
     plt.grid(True)
     plt.legend()
     plt.tight_layout()
@@ -193,8 +192,6 @@ def execute():
     print('\nTest Accuracy (Overall): %2d%% (%2d/%2d)' % (
         100. * np.sum(class_correct) / np.sum(class_total),
         np.sum(class_correct), np.sum(class_total)))
-
-    print('Training End')
 
 
 def main():

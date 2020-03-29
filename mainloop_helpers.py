@@ -6,7 +6,6 @@ import dataset_utils as du
 
 
 def load_data(data_path, raw_path, emb_path, fold):
-    print('Load data from specified dataset')
     data = du.load_1000_genomes(data_path, raw_path, fold=0)
     (x_train, y_train), (x_valid, y_valid), (x_test, y_test) = data
 

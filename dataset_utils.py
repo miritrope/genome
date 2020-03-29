@@ -45,18 +45,19 @@ def split(data_sources, splits):
 
 
 def load_1000_genomes(data_path, raw_path, fold=0):
-    x, y = thousand_genomes.load_data(data_path+raw_path)
+    x, y = thousand_genomes.load_data(data_path + raw_path)
     x = x.astype("float32")
-    (x, y) = shuffle((x, y))
-    print('shuffled the 1k genome raw data')
-    all_folds = split([x, y], [.2, .2, .2, .2])
-    print('split the data into 5 classes of 20% each')
 
+    # Shuffle the 1k genome raw data
+    (x, y) = shuffle((x, y))
+    all_folds = split([x, y], [.2, .2, .2, .2])
+
+    # Split the data into 5 classes of 20% each
     assert fold >= 0
     assert fold < 5
 
     # separate test and all other folds
-    test = all_folds[fold] #test is the first in the folds vector
+    test = all_folds[fold]
     all_folds = all_folds[:fold] + all_folds[(fold + 1):]
 
     # concatenate all folds
@@ -64,7 +65,7 @@ def load_1000_genomes(data_path, raw_path, fold=0):
     y = np.concatenate([el[1] for el in all_folds])
 
     # Data used for supervised training
-    train, valid = split([x, y], [0.75]) # this will split the data into [60%, 20%, 20%]
+    train, valid = split([x, y], [0.75])
     # .75 train .25 valid
 
     mu = x.mean(axis=0)
@@ -75,24 +76,27 @@ def load_1000_genomes(data_path, raw_path, fold=0):
 
     # supervised vector
     sup = [train, valid, test]
-    print('loaded supervised data')
     return sup
 
 
-
-
 def load_embedding_mat(dataset_path, emb_path, fold, transpose):
-    unsupervised_data = np.load(os.path.join(dataset_path, emb_path +
-                                                str(fold) + '.npy'))
-    if transpose:
-        unsupervised_data = unsupervised_data.transpose()
 
-    feat_emb_val = unsupervised_data.astype('float32')
+    try:
+        unsupervised_data = np.load(os.path.join(dataset_path, emb_path +
+                                                    str(fold) + '.npy'))
+        if transpose:
+            unsupervised_data = unsupervised_data.transpose()
+
+        feat_emb_val = unsupervised_data.astype('float32')
+
+    except IOError:
+        print("The embedding matrix file does not exist: ", os.path.join(dataset_path, emb_path +
+                                                    str(fold) + '.npy'))
 
     return feat_emb_val
 
 
 if __name__ == '__main__':
+    print("Load data")
     x = load_1000_genomes(data_path='data/', raw_path='affy_6_biallelic_snps_maf005_thinned_aut_dataset.pkl', fold=0)
     emb = load_embedding_mat(dataset_path='data/', emb_path='histo3x26_fold', fold=0, transpose=True)
-    print("Loading done")
