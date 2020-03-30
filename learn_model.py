@@ -1,11 +1,7 @@
 #!/usr/bin/env python
-import os
-import argparse
-
 import torch
 from torch.autograd import Variable
 import torch.nn as nn
-from torch.utils.data import DataLoader, TensorDataset
 import numpy as np
 import matplotlib.pyplot as plt
 from pytorchtools import EarlyStopping
@@ -195,16 +191,6 @@ def execute():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="""Train Genome""")
-    parser.add_argument('--embedding_source',
-                        default='histo3x26',
-                        help='Source for the feature embedding')
-    parser.add_argument('--dataset_path',
-                        default='/Users/miri/PycharmProjects/genome/data',
-                        help='Path to dataset')
-
-    args = parser.parse_args()
-
     execute()
 
 

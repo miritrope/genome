@@ -1,6 +1,4 @@
 import pickle as pl
-import os
-from os import path
 
 
 def load_data(path):
