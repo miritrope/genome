@@ -25,11 +25,13 @@ def generate_embedding(data_path, raw_path, norm, fold):
         if i % 5000 == 0:
             print("processing snp no: ", i)
         for j in range(n_targets):
+            # generate for each snp , a histogram of four bins, one for each allel's option
             embed[i, j*n_genotypes: j*n_genotypes + n_genotypes] += \
                 np.bincount(genome[i, labels == j].astype('int32'), minlength=n_genotypes)
 
-            embed[i, j*n_genotypes:j * n_genotypes + n_genotypes] /= \
-                embed[i, j*n_genotypes:j * n_genotypes + n_genotypes].sum()
+            # normalizing the result for each class
+            embed[i, j*n_genotypes: j*n_genotypes + n_genotypes] /= \
+                embed[i, j*n_genotypes: j*n_genotypes + n_genotypes].sum()
 
         embed = embed.astype('float32')
 

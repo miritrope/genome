@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from pytorchtools import EarlyStopping
 import mainloop_helpers as mlh
 import model_helpers as mh
+import time
 
 _EPSILON = 10e-8
 
@@ -21,7 +22,7 @@ def execute():
     n_hidden_u = 100
     n_hidden_t_enc = 100
     n_targets = 26
-    num_epochs = 500
+    num_epochs = 1000
     patience = 30
 
     print("Load data")
@@ -44,11 +45,6 @@ def execute():
 
     # Build discrim model
     discrim_model = mh.discrim_net(embedding, feat_emb.shape[0], n_hidden_u, n_hidden_t_enc, n_targets)
-
-    # some comments:
-    # input_discrim size: batch_size, n_feats
-    # input_discrim = Variable(torch.randn(batch_size, feat_emb.shape[0]).type(dtype), requires_grad=False)
-    # y_pred = discrim_model(input_discrim)
 
     # loss_fn = nn.CrossEntropyLoss()
     loss_fn = nn.MSELoss(reduction='mean')
@@ -76,8 +72,11 @@ def execute():
     train_losses = []
     valid_losses = []
 
+    start_training = time.time()
+    epoch_times = 0.0
     for epoch in range(num_epochs):
         print("Epoch {} of {}".format(epoch + 1, num_epochs))
+        start_time = time.time()
 
         train_loss = 0.0
         for x_batch, y_batch in train_minibatches:
@@ -108,12 +107,15 @@ def execute():
         train_losses.append(train_loss)
         valid_losses.append(valid_loss)
 
-        print_msg = (f'[{epoch:>{epoch_len}}/{num_epochs:>{epoch_len}}] ' +
+        print_msg = (f'[{epoch+1:>{epoch_len}}/{num_epochs:>{epoch_len}}] ' +
                      f'train_loss: {train_loss:.5f} ' +
                      f'valid_loss: {valid_loss:.5f}')
 
         print(print_msg)
 
+        print("epoch time: {:.3f}s".format(time.time() - start_time))
+
+        epoch_times += time.time() - start_time
         # early_stopping needs the validation loss to check if it has decresed,
         # and if it has, it will make a checkpoint of the current model
         early_stopping(valid_loss, discrim_model)
@@ -136,12 +138,13 @@ def execute():
     plt.xlabel('epochs')
     plt.ylabel('loss')
     plt.xlim(0, len(train_losses) + 1)  # consistent scale
-    plt.ylim(0, 4)  # consistent scale
+    plt.ylim(0, 3)  # consistent scale
     plt.grid(True)
     plt.legend()
     plt.tight_layout()
     plt.show()
-    fig.savefig('loss_plot.png', bbox_inches='tight')
+    pic_name = 'loss_plot_bs: ' + str(batch_size) + '_epoch_size: ' + str(num_epochs) + '.png'
+    fig.savefig(pic_name, bbox_inches='tight')
 
     # test
     # initialize lists to monitor test loss and accuracy
@@ -177,17 +180,22 @@ def execute():
 
     # calculate and print avg test loss
     test_loss = test_loss / len(test_minibatches)
-    print('Test Loss: {:.6f}\n'.format(test_loss))
+    print('\tTest Loss: {:.6f}\t'.format(test_loss))
 
     for i in range(n_targets):
         if class_total[i] > 0:
-            print('Test Accuracy of %5s: %2d%% (%2d/%2d)' % (
+            print('Test Accuracy of %5s: %2f%% (%2d/%2d)' % (
                 str(i), 100 * class_correct[i] / class_total[i],
                 np.sum(class_correct[i]), np.sum(class_total[i])))
 
-    print('\nTest Accuracy (Overall): %2d%% (%2d/%2d)' % (
+    print('batch size is:\t', batch_sizei )
+    print('mean epoch time is: {:.3f}s\n', epoch_times/num_epochs)
+    print('Test Accuracy (Overall): %2f%% (%2d/%2d)\t' % (
         100. * np.sum(class_correct) / np.sum(class_total),
         np.sum(class_correct), np.sum(class_total)))
+
+    # Print all final errors for train, validation and test
+    print("Training time:\n{:.3f}s".format(time.time() - start_training))
 
 
 def main():
