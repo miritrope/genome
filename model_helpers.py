@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-# TODO: W=Uniform(encoder_net_init)
 class feat_emb_net(nn.Module):
     def __init__(self, n_feats, n_hidden_u, n_hidden_t_enc):
         super(feat_emb_net, self).__init__()
@@ -24,10 +23,10 @@ class discrim_net(nn.Module):
         self.batchNorm2 = nn.BatchNorm1d(n_hidden_t_enc)
 
         self.dropOut = nn.Dropout(0.5)
-        # n_feats = 315, hidden1 weight shape: 100 x n_hidden_u, embedding shape: n_feats x 100
         self.hidden_1 = nn.Linear(n_feats, n_hidden_u)
-        with torch.no_grad():
-            self.hidden_1.weight.copy_(embedding)
+        if len(embedding):
+            with torch.no_grad():
+                self.hidden_1.weight.copy_(embedding)
         self.hidden_2 = nn.Linear(n_hidden_u, n_hidden_t_enc)
         self.hidden_3 = nn.Linear(n_hidden_t_enc, n_targets)
 
