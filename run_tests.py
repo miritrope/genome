@@ -1,31 +1,30 @@
 import learn_model as lm
 import sys
 import os
+import pickle
+from datetime import date
 
 def blockPrint():
     sys.__stdout__ = sys.stdout
     sys.stdout = open(os.devnull, 'w')
-
 def enablePrint():
     sys.stdout = sys.__stdout__
 
 
-batch_size = [80, 64, 128]
-n_epochs = 300
+batch_size = [256, 128, 64, 32]
+n_epochs = 800
 patience = 50
+fold = 1
 
-res_bs = []
+results = []
 blockPrint()
-for task in batch_size: res_bs.append(lm.execute(task, n_epochs, patience, True))
-
-res_f = []
-res_f.append(lm.execute(batch_size[0], n_epochs, patience, True))
-res_f.append(lm.execute(batch_size[0], n_epochs, patience, False))
+for task in batch_size: results.append(lm.execute(fold, task, n_epochs, patience, False))
+for task in batch_size: results.append(lm.execute(fold, task, n_epochs, patience, True))
 
 enablePrint()
-# printing
-print('distinguish between batch size\n')
-for r in res_bs: print(r, '\n')
-print('distinguish between emb flag\n')
-for r in res_f: print(r, '\n')
+for r in results: print(r, '\n')
 
+# save the results
+today = date.today()
+with open(today + 'tests_res.pkl', 'wb') as f:
+    pickle.dump(results, f)

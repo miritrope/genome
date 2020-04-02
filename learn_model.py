@@ -12,8 +12,7 @@ import time
 _EPSILON = 10e-8
 
 
-def execute(batch_size, n_epochs, patience, use_embed_layer):
-    fold = 0
+def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
     embedding_source = 'embed_4x26_fold'
     raw_path = 'affy_6_biallelic_snps_maf005_thinned_aut_dataset.pkl'
     dataset_path = 'data/'
@@ -67,7 +66,7 @@ def execute(batch_size, n_epochs, patience, use_embed_layer):
     total_epoch_time = 0.
     for epoch in range(n_epochs):
         print("Epoch {} of {}".format(epoch + 1, n_epochs))
-        epoch_time = time.time()
+        epoch_start_time = time.time()
 
         train_loss = 0.
         for x_batch, y_batch in train_minibatches:
@@ -104,9 +103,9 @@ def execute(batch_size, n_epochs, patience, use_embed_layer):
 
         print(print_msg)
 
-        print("epoch time: {:.3f}s".format(time.time() - epoch_time))
-
-        total_epoch_time += time.time() - epoch_time
+        epoch_time = time.time() - epoch_start_time
+        print("epoch time: {:.3f}s".format(epoch_time))
+        total_epoch_time += epoch_time
 
         # early_stopping needs the validation loss to check if it has decresed,
         # and if it has, it will make a checkpoint of the current model
@@ -161,11 +160,13 @@ def execute(batch_size, n_epochs, patience, use_embed_layer):
     #             str(i), 100 * class_correct[i] / class_total[i],
     #             np.sum(class_correct[i]), np.sum(class_total[i])))
 
-    mean_epoch_time = total_epoch_time / n_epochs
+    # n_real_epoch considers early stopping
+    n_real_epoch = len(train_losses)
+    mean_epoch_time = total_epoch_time / n_real_epoch
     train_time = time.time() - start_training
     test_acc = 100. * np.sum(class_correct) / np.sum(class_total)
-    # print('Test Accuracy (Overall): %2f%% (%2d/%2d)\t' % (
-    #     test_acc, np.sum(class_correct), np.sum(class_total)))
+    print('Test Accuracy (Overall): %2f%% (%2d/%2d)\t' % (
+        test_acc, np.sum(class_correct), np.sum(class_total)))
 
     # visualize the loss
     fig = plt.figure(figsize=(10, 8))
@@ -177,7 +178,7 @@ def execute(batch_size, n_epochs, patience, use_embed_layer):
     plt.xlabel('epochs')
     plt.ylabel('loss')
     plt.xlim(0, len(train_losses) + 1)  # consistent scale
-    plt.ylim(0, 3)  # consistent scale
+    plt.ylim(0, max(train_losses + valid_losses))  # consistent scale
     plt.grid(True)
     plt.legend()
     plt.tight_layout()
@@ -185,11 +186,11 @@ def execute(batch_size, n_epochs, patience, use_embed_layer):
     pic_name = f' bs:{batch_size}' + f' t_f:{use_embed_layer}' + f' acc:{test_acc:.1f}' + '.png'
     fig.savefig(pic_name, bbox_inches='tight')
 
-    return [test_acc, test_loss, mean_epoch_time, train_time]
+    return [batch_size, train_losses, valid_losses, test_acc, mean_epoch_time, train_time]
 
 
 def main():
-    execute(batch_size, n_epochs, patience, use_embed_layer)
+    execute(fold, batch_size, n_epochs, patience, use_embed_layer)
 
 
 if __name__ == '__main__':
