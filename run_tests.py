@@ -26,5 +26,5 @@ for r in results: print(r, '\n')
 
 # save the results
 today = date.today()
-with open(today + 'tests_res.pkl', 'wb') as f:
+with open(str(today) + '_tests_res.pkl', 'wb') as f:
     pickle.dump(results, f)

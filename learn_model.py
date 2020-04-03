@@ -8,6 +8,8 @@ from pytorchtools import EarlyStopping
 import mainloop_helpers as mlh
 import model_helpers as mh
 import time
+import plot_results as pr
+
 
 _EPSILON = 10e-8
 
@@ -169,22 +171,7 @@ def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
         test_acc, np.sum(class_correct), np.sum(class_total)))
 
     # visualize the loss
-    fig = plt.figure(figsize=(10, 8))
-    plt.plot(range(1, len(train_losses) + 1), train_losses, label='Training Loss')
-    plt.plot(range(1, len(valid_losses) + 1), valid_losses, label='Validation Loss')
-    # find position of lowest validation loss
-    minposs = valid_losses.index(min(valid_losses)) + 1
-    plt.axvline(minposs, linestyle='--', color='r', label='Early Stopping Checkpoint')
-    plt.xlabel('epochs')
-    plt.ylabel('loss')
-    plt.xlim(0, len(train_losses) + 1)  # consistent scale
-    plt.ylim(0, max(train_losses + valid_losses))  # consistent scale
-    plt.grid(True)
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
-    pic_name = f' bs:{batch_size}' + f' t_f:{use_embed_layer}' + f' acc:{test_acc:.1f}' + '.png'
-    fig.savefig(pic_name, bbox_inches='tight')
+    pr.plot_results(train_losses, valid_losses, batch_size, use_embed_layer, test_acc)
 
     return [batch_size, train_losses, valid_losses, test_acc, mean_epoch_time, train_time]
 
@@ -194,4 +181,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    n_epochs = 2
+    patience = 50
+    fold = 1
+    execute(fold, 128, n_epochs, patience, False)
