@@ -1,26 +1,35 @@
 import pickle as pl
 import matplotlib.pyplot as plt
-
+import numpy as np
 
 # visualize the loss
-def plot_results(train_losses, valid_losses, batch_size, use_embed_layer, test_acc):
+def plot_results(plotme, batch_size, use_embed_layer, tests_acc):
     print('Plotting results')
     fig = plt.figure(figsize=(10, 8))
-    plt.plot(range(1, len(train_losses) + 1), train_losses, label='Training Loss')
-    plt.plot(range(1, len(valid_losses) + 1), valid_losses, label='Validation Loss')
-    # find position of lowest validation loss
-    minposs = valid_losses.index(min(valid_losses)) + 1
-    plt.axvline(minposs, linestyle='--', color='r', label='Early Stopping Checkpoint')
+    lenses = []
+    max_vals = []
+
+    for i in range(len(plotme)):
+        lab = str(batch_size[i]) + ' '
+        lab += f' {tests_acc[i]:.1f}'
+        plt.plot(range(1, len(plotme[i]) + 1), plotme[i], label=lab)
+        lenses.append(len(plotme[i]))
+        max_vals.append(np.max(plotme[i]))
+
     plt.xlabel('epochs')
-    plt.ylabel('loss')
-    plt.xlim(0, len(train_losses) + 1)  # consistent scale
-    plt.ylim(0, max(train_losses + valid_losses))  # consistent scale
+    plt.ylabel('accuracy')
+
+    plt.xlim(0, np.max(lenses) + 1)
+    plt.ylim(0, np.max(max_vals) + 1)
+
     plt.grid(True)
     plt.legend()
     plt.tight_layout()
     plt.show()
-    pic_name = f' bs:{batch_size}' + f' t_f:{use_embed_layer}' + f' acc:{test_acc:.1f}' + '.png'
+    pic_name = f' t_f:{use_embed_layer}' + '.png'
+
     fig.savefig(pic_name, bbox_inches='tight')
+    print('Saved picture: ', pic_name)
 
 
 if __name__ == '__main__':
@@ -29,16 +38,3 @@ if __name__ == '__main__':
         results = pl.load(f)
 
     fa256, fa128, fa64, fa32, tr256, tr128, tr64, tr32 = results
-    # pick which experiment you want by assigning exp
-    exp1 = fa128
-
-    # extract the arguments
-    batch_size = exp[0]
-    train_losses = exp[1]
-    valid_losses = exp[2]
-    test_acc = exp[3]
-
-    # if str(exp) == str(fa256) or str(fa128) or str(fa64) or str(fa32):
-    #     plot_results(train_losses, valid_losses, batch_size, 'False', test_acc)
-    # else:
-    #     plot_results(train_losses, valid_losses, batch_size, 'True', test_acc)

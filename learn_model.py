@@ -8,7 +8,6 @@ from pytorchtools import EarlyStopping
 import mainloop_helpers as mlh
 import model_helpers as mh
 import time
-import plot_results as pr
 
 
 _EPSILON = 10e-8
@@ -64,19 +63,34 @@ def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
     train_losses = []
     valid_losses = []
 
+    train_accs = []
     start_training = time.time()
-    total_epoch_time = 0.
+    epoch_times = []
     for epoch in range(n_epochs):
         print("Epoch {} of {}".format(epoch + 1, n_epochs))
         epoch_start_time = time.time()
 
+        train_class_correct = list(0. for i in range(n_targets))
+        train_class_total = list(0. for i in range(n_targets))
         train_loss = 0.
         for x_batch, y_batch in train_minibatches:
             x_train = Variable(torch.from_numpy(x_batch))
             y_train = Variable(torch.from_numpy(y_batch))
 
-            loss = train_step(x_train, y_train)
+            loss, pred = train_step(x_train, y_train)
             train_loss += loss * batch_size
+
+            # compare predictions to true label
+            y_train = np.argmax(y_train.data, axis=1)
+            correct = np.squeeze(pred.eq(y_train.view_as(pred)))
+
+            for i in range(batch_size):
+                label = y_train[i]
+                train_class_correct[label] += correct[i].item()
+                train_class_total[label] += 1
+
+        train_acc = 100. * np.sum(train_class_correct) / np.sum(train_class_total)
+        train_accs.append(train_acc)
 
         discrim_model.eval()
 
@@ -107,7 +121,7 @@ def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
 
         epoch_time = time.time() - epoch_start_time
         print("epoch time: {:.3f}s".format(epoch_time))
-        total_epoch_time += epoch_time
+        epoch_times.append(epoch_time)
 
         # early_stopping needs the validation loss to check if it has decresed,
         # and if it has, it will make a checkpoint of the current model
@@ -163,17 +177,13 @@ def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
     #             np.sum(class_correct[i]), np.sum(class_total[i])))
 
     # n_real_epoch considers early stopping
-    n_real_epoch = len(train_losses)
-    mean_epoch_time = total_epoch_time / n_real_epoch
+    # n_real_epoch = len(train_losses)
     train_time = time.time() - start_training
     test_acc = 100. * np.sum(class_correct) / np.sum(class_total)
     print('Test Accuracy (Overall): %2f%% (%2d/%2d)\t' % (
         test_acc, np.sum(class_correct), np.sum(class_total)))
 
-    # visualize the loss
-    pr.plot_results(train_losses, valid_losses, batch_size, use_embed_layer, test_acc)
-
-    return [batch_size, train_losses, valid_losses, test_acc, mean_epoch_time, train_time]
+    return [train_losses, valid_losses, train_accs, test_acc, epoch_times, train_time]
 
 
 def main():

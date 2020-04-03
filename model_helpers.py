@@ -48,6 +48,8 @@ def make_train_step(model, loss_fn, optimizer):
         # Makes predictions
         # input_discrim size = 80,315
         yhat = model(x)
+        _, pred = torch.max(yhat, 1)
+
         # Computes loss
         loss = loss_fn(y, yhat)
         # Computes gradients
@@ -56,7 +58,7 @@ def make_train_step(model, loss_fn, optimizer):
         optimizer.step()
         optimizer.zero_grad()
         # Returns the loss
-        return loss.item()
+        return loss.item(), pred
 
     # Returns the function that will be called inside the train loop
     return train_step
