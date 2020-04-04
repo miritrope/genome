@@ -22,7 +22,7 @@ def test_train():
     n_epochs = 200
     patience = 50
     fold = 1
-    use_embed_layer = 'False'
+    use_embed_layer = False
     n_experiments = 5
 
     print('Training ... ')
@@ -38,9 +38,9 @@ def test_train():
     # save the results
     today = date.today()
     if use_embed_layer:
-        experiment = ' find mean/std with aux net'
+        experiment = ' find mean_std with aux net'
     else:
-        experiment = ' find mean/std without aux net'
+        experiment = ' find mean_std without aux net'
 
     res_file_name = str(today) + experiment
     with open(res_file_name + '.pkl', 'wb') as f:
