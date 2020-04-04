@@ -13,23 +13,28 @@ _EPSILON = 10e-8
 
 
 def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
-    embedding_source = 'embed_4x26_fold'
     raw_path = 'affy_6_biallelic_snps_maf005_thinned_aut_dataset.pkl'
     dataset_path = 'data/'
+
+    embedding_source = []
+    if use_embed_layer:
+        embedding_source = 'embed_4x26_fold'
+
     learning_rate = 3e-5
     n_hidden_1 = 100
     n_hidden_2 = 100
     n_targets = 26
 
-    print("Load data")
+    # print("Load data")
     x_train, y_train, x_valid, y_valid, x_test, y_test, \
     x_unsup, training_labels = mlh.load_data(dataset_path, raw_path, embedding_source, fold)
-    n_feats = x_unsup.shape[0]
-    n_emb = x_unsup.shape[1]
+    n_feats = x_train.shape[1]
 
     print('Build models')
     # Build discrim model
     if use_embed_layer:
+
+        n_emb = x_unsup.shape[1]
         feat_emb = Variable(torch.from_numpy(x_unsup))
         # Build embedding model
         emb_model = mh.feat_emb_net(n_emb, n_hidden_1, n_hidden_2)
@@ -134,7 +139,7 @@ def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
         print(print_msg)
 
         epoch_time = time.time() - epoch_start_time
-        print("epoch time: {:.3f}s".format(epoch_time))
+        # print("epoch time: {:.3f}s".format(epoch_time))
         epoch_times.append(epoch_time)
 
         # early_stopping needs the validation loss to check if it has decresed,
@@ -182,7 +187,7 @@ def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
 
     # printing results
     test_loss = test_loss / len(test_minibatches)
-    print('\tTest Loss: {:.6f}\t'.format(test_loss))
+    print('Test Loss: {:.6f}\t'.format(test_loss))
 
     train_time = time.time() - start_training
     test_acc = 100. * np.sum(class_correct) / np.sum(class_total)

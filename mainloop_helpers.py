@@ -5,10 +5,14 @@ import torch
 
 def load_data(data_path, raw_path, emb_path, fold):
     # norm by default is true because for training the samples is normalized
+    print('Load 1000 genome data')
     data = du.load_1000_genomes(data_path, raw_path, fold=0, norm=True)
     (x_train, y_train), (x_valid, y_valid), (x_test, y_test) = data
 
-    feat_emb_val = du.load_embedding_mat(data_path, emb_path, fold=0, transpose=False)
+    feat_emb_val = []
+    if emb_path:
+        print('Load embedding data')
+        feat_emb_val = du.load_embedding_mat(data_path, emb_path, fold=0, transpose=False)
 
     training_labels = y_train
 
