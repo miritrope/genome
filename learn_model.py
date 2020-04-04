@@ -3,7 +3,6 @@ import torch
 from torch.autograd import Variable
 import torch.nn as nn
 import numpy as np
-import matplotlib.pyplot as plt
 from pytorchtools import EarlyStopping
 import mainloop_helpers as mlh
 import model_helpers as mh
@@ -57,12 +56,13 @@ def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
 
     # initialize the early_stopping object
     early_stopping = EarlyStopping(patience=patience, verbose=True)
-    train_step = mh.make_train_step(discrim_model, loss_fn, optimizer)
+    train_step = mlh.make_train_step(discrim_model, loss_fn, optimizer)
     epoch_len = len(str(n_epochs))
 
     train_losses = []
     valid_losses = []
 
+    valid_accs = []
     train_accs = []
     start_training = time.time()
     epoch_times = []
@@ -70,8 +70,8 @@ def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
         print("Epoch {} of {}".format(epoch + 1, n_epochs))
         epoch_start_time = time.time()
 
-        train_class_correct = list(0. for i in range(n_targets))
-        train_class_total = list(0. for i in range(n_targets))
+        class_correct = list(0. for i in range(n_targets))
+        class_total = list(0. for i in range(n_targets))
         train_loss = 0.
         for x_batch, y_batch in train_minibatches:
             x_train = Variable(torch.from_numpy(x_batch))
@@ -86,10 +86,10 @@ def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
 
             for i in range(batch_size):
                 label = y_train[i]
-                train_class_correct[label] += correct[i].item()
-                train_class_total[label] += 1
+                class_correct[label] += correct[i].item()
+                class_total[label] += 1
 
-        train_acc = 100. * np.sum(train_class_correct) / np.sum(train_class_total)
+        train_acc = 100. * np.sum(class_correct) / np.sum(class_total)
         train_accs.append(train_acc)
 
         discrim_model.eval()
@@ -104,6 +104,20 @@ def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
                 loss = loss_fn(y_val, yhat)
 
                 valid_loss += loss.item() * batch_size
+
+                # compare predictions to true label
+                _, pred = torch.max(yhat, 1)
+                y_val = np.argmax(y_val.data, axis=1)
+                correct = np.squeeze(pred.eq(y_val.view_as(pred)))
+
+                for i in range(batch_size):
+                    label = y_val[i]
+                    class_correct[label] += correct[i].item()
+                    class_total[label] += 1
+
+            valid_acc = 100. * np.sum(class_correct) / np.sum(class_total)
+            valid_accs.append(valid_acc)
+
 
         # finished a batch
 
@@ -170,20 +184,12 @@ def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
     test_loss = test_loss / len(test_minibatches)
     print('\tTest Loss: {:.6f}\t'.format(test_loss))
 
-    # for i in range(n_targets):
-    #     if class_total[i] > 0:
-    #         print('Test Accuracy of %5s: %2f%% (%2d/%2d)' % (
-    #             str(i), 100 * class_correct[i] / class_total[i],
-    #             np.sum(class_correct[i]), np.sum(class_total[i])))
-
-    # n_real_epoch considers early stopping
-    # n_real_epoch = len(train_losses)
     train_time = time.time() - start_training
     test_acc = 100. * np.sum(class_correct) / np.sum(class_total)
     print('Test Accuracy (Overall): %2f%% (%2d/%2d)\t' % (
         test_acc, np.sum(class_correct), np.sum(class_total)))
 
-    return [train_losses, valid_losses, train_accs, test_acc, epoch_times, train_time]
+    return [train_losses, valid_losses, train_accs, valid_accs, test_acc, epoch_times, train_time]
 
 
 def main():

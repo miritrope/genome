@@ -2,8 +2,9 @@ import pickle as pl
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 # visualize the loss
-def plot_results(plotme, batch_size, use_embed_layer, tests_acc):
+def plot_results(exp_name, plotme, batch_size, use_embed_layer, tests_acc):
     print('Plotting results')
     fig = plt.figure(figsize=(10, 8))
     lenses = []
@@ -17,24 +18,22 @@ def plot_results(plotme, batch_size, use_embed_layer, tests_acc):
         max_vals.append(np.max(plotme[i]))
 
     plt.xlabel('epochs')
-    plt.ylabel('accuracy')
+    plt.ylabel('valid accuracy')
 
-    plt.xlim(0, np.max(lenses) + 1)
-    plt.ylim(0, np.max(max_vals) + 1)
+    plt.xlim(0, 250)
+    plt.ylim(0, 150)
 
     plt.grid(True)
     plt.legend()
     plt.tight_layout()
     plt.show()
-    pic_name = f' t_f:{use_embed_layer}' + '.png'
+    pic_name = exp_name + '.png'
 
     fig.savefig(pic_name, bbox_inches='tight')
     print('Saved picture: ', pic_name)
 
 
 if __name__ == '__main__':
-    file_name = '2020-04-03_tests_res.pkl'
+    file_name = '2020-04-03_valid_acc.pkl'
     with open(file_name, 'rb') as f:
         results = pl.load(f)
-
-    fa256, fa128, fa64, fa32, tr256, tr128, tr64, tr32 = results
