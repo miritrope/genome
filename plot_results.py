@@ -5,17 +5,15 @@ import matplotlib.pyplot as plt
 def plot_results(exp_name, plotme, batch_size, tests_acc):
     print('Plotting results')
     fig = plt.figure(figsize=(10, 8))
-
+    label = ['Training Loss', 'Validation Loss']
     for i in range(len(plotme)):
-        lab = str(batch_size[i]) + ' '
-        lab += f' {tests_acc[i]:.1f}'
-        plt.plot(range(1, len(plotme[i]) + 1), plotme[i], label=lab)
+        plt.plot(range(1, len(plotme[i]) + 1), plotme[i], label=label[i])
 
     plt.xlabel('Epoch')
-    plt.ylabel('Time')
+    plt.ylabel('Loss')
 
     plt.xlim(0, 200)
-    plt.ylim(0, 20)
+    plt.ylim(0, 3)
 
     plt.grid(True)
     plt.legend()

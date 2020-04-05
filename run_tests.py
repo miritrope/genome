@@ -26,7 +26,7 @@ def test_train():
     n_experiments = 1
 
     print('Training ... ')
-    blockPrint()
+    # blockPrint()
 
     results = []
     for i in range(n_experiments):

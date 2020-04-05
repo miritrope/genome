@@ -33,7 +33,6 @@ def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
     print('Build models')
     # Build discrim model
     if use_embed_layer:
-
         n_emb = x_unsup.shape[1]
         feat_emb = Variable(torch.from_numpy(x_unsup))
         # Build embedding model
