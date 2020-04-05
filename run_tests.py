@@ -19,11 +19,11 @@ def test_train():
     # batch_sizes = [256, 128, 64, 32]
     batch_sizes = [64]
 
-    n_epochs = 200
+    n_epochs = 3000
     patience = 50
     fold = 1
-    use_embed_layer = False
-    n_experiments = 5
+    use_embed_layer = True
+    n_experiments = 1
 
     print('Training ... ')
     blockPrint()
@@ -38,9 +38,9 @@ def test_train():
     # save the results
     today = date.today()
     if use_embed_layer:
-        experiment = ' find mean_std with aux net'
+        experiment = ' with aux net 3000 epochs'
     else:
-        experiment = ' find mean_std without aux net'
+        experiment = ' without aux net 3000 epochs'
 
     res_file_name = str(today) + experiment
     with open(res_file_name + '.pkl', 'wb') as f:
@@ -49,10 +49,10 @@ def test_train():
 
 
 def run_plot_results():
-    batch_sizes = [256, 128, 64, 32]
+    batch_sizes = [64]
 
-    file_name = '2020-04-04 without aux net results.pkl'
-    experiment = 'epoch_times without aux net'
+    file_name = 'results pkl/tests_res 800 epoch.pkl'
+    experiment = 'losses without aux net 64'
 
     with open(file_name, 'rb') as f:
         results = pl.load(f)
@@ -66,7 +66,7 @@ def run_plot_results():
     epoch_times = list(r[5] for r in results)
     train_time = list(r[6] for r in results)
 
-    pr.plot_results(experiment, epoch_times, batch_sizes, train_time)
+    pr.plot_results(experiment, [train_losses[0], valid_losses[0]], batch_sizes, test_accs)
 
 
 if __name__ == '__main__':
