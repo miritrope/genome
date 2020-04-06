@@ -12,17 +12,17 @@ import time
 _EPSILON = 10e-8
 
 
-def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
+def execute(fold, hidden_sizes, n_epochs, patience, use_embed_layer, dropout_sizes):
     raw_path = 'affy_6_biallelic_snps_maf005_thinned_aut_dataset.pkl'
     dataset_path = 'data/'
-
+    batch_size = 64
     embedding_source = []
     if use_embed_layer:
         embedding_source = 'embed_4x26_fold'
 
     learning_rate = 3e-5
-    n_hidden_1 = 50
-    n_hidden_2 = 50
+    n_hidden_1 = hidden_sizes[0]
+    n_hidden_2 = hidden_sizes[1]
     n_targets = 26
 
     # print("Load data")
@@ -44,7 +44,7 @@ def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
         discrim_model = mh.discrim_net(embedding, n_feats, n_hidden_1, n_hidden_2, n_targets)
 
     else:
-        discrim_model = mh.discrim_net([], n_feats, n_hidden_1, n_hidden_2, n_targets)
+        discrim_model = mh.discrim_net([], n_feats, n_hidden_1, n_hidden_2, n_targets, dropout_sizes)
 
     loss_fn = nn.MSELoss(reduction='mean')
     optimizer = torch.optim.Adam(discrim_model.parameters(), lr=learning_rate)
@@ -52,7 +52,7 @@ def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
     # Finally, launch the training loop.
     print("Start training ...")
     train_minibatches = list(mlh.iterate_minibatches(x_train, y_train,
-                                                     batch_size))
+                                                      batch_size))
     valid_minibatches = list(mlh.iterate_minibatches(x_valid, y_valid,
                                                     batch_size))
     test_minibatches = list(mlh.iterate_minibatches(x_test, y_test,
@@ -120,8 +120,8 @@ def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
                     class_total[label] += 1
 
             valid_acc = 100. * np.sum(class_correct) / np.sum(class_total)
+            print(f'Valid accuracy: {valid_acc:.1f}')
             valid_accs.append(valid_acc)
-
 
         # finished a batch
 
@@ -195,13 +195,3 @@ def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
 
     return [train_losses, valid_losses, train_accs, valid_accs, test_acc, epoch_times, train_time]
 
-
-def main():
-    execute(fold, batch_size, n_epochs, patience, use_embed_layer)
-
-
-if __name__ == '__main__':
-    n_epochs = 2
-    patience = 50
-    fold = 1
-    execute(fold, 128, n_epochs, patience, False)
