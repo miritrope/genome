@@ -21,8 +21,8 @@ def execute(fold, batch_size, n_epochs, patience, use_embed_layer):
         embedding_source = 'embed_4x26_fold'
 
     learning_rate = 3e-5
-    n_hidden_1 = 100
-    n_hidden_2 = 100
+    n_hidden_1 = 50
+    n_hidden_2 = 50
     n_targets = 26
 
     # print("Load data")

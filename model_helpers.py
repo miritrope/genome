@@ -22,7 +22,7 @@ class discrim_net(nn.Module):
         self.batchNorm1 = nn.BatchNorm1d(n_hidden_u)
         self.batchNorm2 = nn.BatchNorm1d(n_hidden_t_enc)
 
-        self.dropOut = nn.Dropout(0.5)
+        self.dropOut = nn.Dropout(0.8)
         self.hidden_1 = nn.Linear(n_feats, n_hidden_u)
         if len(embedding):
             with torch.no_grad():

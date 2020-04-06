@@ -2,7 +2,6 @@ import learn_model as lm
 import sys
 import os
 import pickle as pl
-from datetime import date
 import plot_results as pr
 
 
@@ -15,14 +14,14 @@ def enablePrint():
     sys.stdout = sys.__stdout__
 
 
-def test_train():
-    # batch_sizes = [256, 128, 64, 32]
-    batch_sizes = [64]
+batch_sizes = [64]
 
-    n_epochs = 3000
+
+def test_train(description):
+    n_epochs = 1000
     patience = 50
     fold = 1
-    use_embed_layer = True
+    use_embed_layer = False
     n_experiments = 1
 
     print('Training ... ')
@@ -36,23 +35,18 @@ def test_train():
     for r in results: print(r, '\n')
 
     # save the results
-    today = date.today()
     if use_embed_layer:
-        experiment = ' with aux net 3000 epochs'
+        experiment = 'with aux net '
     else:
-        experiment = ' without aux net 3000 epochs'
+        experiment = 'without aux net '
 
-    res_file_name = str(today) + experiment
+    res_file_name = experiment + description
     with open(res_file_name + '.pkl', 'wb') as f:
         pl.dump(results, f)
     print('Saved results data file: ', res_file_name + '.pkl')
 
 
-def run_plot_results():
-    batch_sizes = [64]
-
-    file_name = 'results pkl/tests_res 800 epoch.pkl'
-    experiment = 'losses without aux net 64'
+def run_plot_results(file_name, experiment):
 
     with open(file_name, 'rb') as f:
         results = pl.load(f)
@@ -70,4 +64,6 @@ def run_plot_results():
 
 
 if __name__ == '__main__':
-    test_train()
+    experiment = 'without aux net ep 100 hi1 50 hi2 50 dr 08'
+    test_train(experiment)
+    run_plot_results(experiment + '.pkl', experiment)

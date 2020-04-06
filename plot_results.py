@@ -12,7 +12,7 @@ def plot_results(exp_name, plotme, batch_size, tests_acc):
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
 
-    plt.xlim(0, 200)
+    plt.xlim(0, 1000)
     plt.ylim(0, 3)
 
     plt.grid(True)
