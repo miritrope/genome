@@ -3,6 +3,7 @@ import sys
 import os
 import pickle as pl
 import plot_results as pr
+import argparse
 
 
 def blockPrint():
@@ -37,34 +38,62 @@ def run_results(results, exp_name, n_epochs):
                     n_epochs, pic_name)
 
 
+def main():
+
+    parser = argparse.ArgumentParser(description="""Train Genetic Networks""")
+
+    parser.add_argument('-patience',
+                        type=int,
+                        default=0,
+                        help="patience for the early stopping")
+    parser.add_argument('-fold',
+                        type=int,
+                        default=0,
+                        help="which fold of the dataset")
+    parser.add_argument('-use_embed_layer',
+                        type=int,
+                        default=0,
+                        help="whether to use the auxiliary network")
+    parser.add_argument('-n_epochs',
+                        type=int,
+                        default=0,
+                        help="number of epochs")
+    parser.add_argument('-hidden_sizes',
+                        type=int,
+                        default=[],
+                        help="hidden units sizes")
+    parser.add_argument('-dropout_1',
+                        type=float,
+                        default=[],
+                        help="dropout hidden layer 1")
+    parser.add_argument('-dropout_2',
+                        type=float,
+                        default=[],
+                        help="dropout hidden layer 2")
+
+    args = parser.parse_args()
+
+    # define experiment name
+    experiment = ''
+    if args.use_embed_layer:
+        experiment += 'with '
+    else:
+        experiment += 'without '
+
+    n_hidden = [args.hidden_sizes, args.hidden_sizes]
+    drop_sizes = [args.dropout_1, args.dropout_2]
+
+    experiment += ('ep ' + str(args.n_epochs) +
+                    ' hi ' + str(n_hidden) +
+                        ' dr ' + str(drop_sizes))
+
+    print(experiment)
+
+    results = lm.execute(args.fold, n_hidden, args.n_epochs,
+               args.patience, args.use_embed_layer, drop_sizes)
+
+    run_results(results, experiment, args.n_epochs)
+
+
 if __name__ == '__main__':
-
-    patience = 50
-    fold = 1
-    use_embed_layer = False
-    n_epochs = 3000
-    tasks = [[[50, 50],   [80, 80],   [50, 50]],
-        [[0.8, 0.8], [0.8, 0.2], [0.8, 0.2]]]
-
-    for i in range(len(tasks[0])):
-
-        # define experiment name
-        experiment = ''
-        if use_embed_layer:
-            experiment += 'with '
-        else:
-            experiment += 'without '
-
-        n_hidden = tasks[0][i]
-        drop_sizes = tasks[1][i]
-
-        experiment += ('ep ' + str(n_epochs) +
-                        ' hi ' + str(n_hidden) +
-                            ' dr ' + str(drop_sizes))
-
-        print(experiment)
-
-        results = lm.execute(fold, n_hidden, n_epochs,
-                   patience, use_embed_layer, drop_sizes)
-
-        run_results(results, experiment, n_epochs)
+    main()
