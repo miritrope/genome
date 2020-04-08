@@ -44,11 +44,11 @@ def main():
 
     parser.add_argument('-patience',
                         type=int,
-                        default=0,
-                        help="patience for the early stopping")
+                        default=50,
+                        help="patience of the early stopping")
     parser.add_argument('-fold',
                         type=int,
-                        default=0,
+                        default=1,
                         help="which fold of the dataset")
     parser.add_argument('-use_embed_layer',
                         type=int,
@@ -56,19 +56,19 @@ def main():
                         help="whether to use the auxiliary network")
     parser.add_argument('-n_epochs',
                         type=int,
-                        default=0,
+                        default=1000,
                         help="number of epochs")
     parser.add_argument('-hidden_sizes',
                         type=int,
-                        default=[],
+                        default=50,
                         help="hidden units sizes")
     parser.add_argument('-dropout_1',
                         type=float,
-                        default=[],
+                        default=0.8,
                         help="dropout hidden layer 1")
     parser.add_argument('-dropout_2',
                         type=float,
-                        default=[],
+                        default=0.5,
                         help="dropout hidden layer 2")
 
     args = parser.parse_args()

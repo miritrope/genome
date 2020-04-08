@@ -30,6 +30,8 @@ def execute(fold, hidden_sizes, n_epochs, patience, use_embed_layer, dropout_siz
     x_unsup, training_labels = mlh.load_data(dataset_path, raw_path, embedding_source, fold)
     n_feats = x_train.shape[1]
 
+    embedding = []
+
     print('Build models')
     # Build discrim model
     if use_embed_layer:
@@ -41,10 +43,8 @@ def execute(fold, hidden_sizes, n_epochs, patience, use_embed_layer, dropout_siz
         # embedding size: n_emb x n_hidden_2
         # transpose to fit the weights in the discriminative network
         embedding = torch.transpose(embedding, 1, 0)
-        discrim_model = mh.discrim_net(embedding, n_feats, n_hidden_1, n_hidden_2, n_targets)
 
-    else:
-        discrim_model = mh.discrim_net([], n_feats, n_hidden_1, n_hidden_2, n_targets, dropout_sizes)
+    discrim_model = mh.discrim_net(embedding, n_feats, n_hidden_1, n_hidden_2, n_targets, dropout_sizes)
 
     loss_fn = nn.MSELoss(reduction='mean')
     optimizer = torch.optim.Adam(discrim_model.parameters(), lr=learning_rate)
@@ -95,7 +95,7 @@ def execute(fold, hidden_sizes, n_epochs, patience, use_embed_layer, dropout_siz
 
         train_acc = 100. * np.sum(class_correct) / np.sum(class_total)
         train_accs.append(train_acc)
-
+        print(f'Train accuracy: {train_acc:.1f}')
         discrim_model.eval()
 
         valid_loss = 0.
