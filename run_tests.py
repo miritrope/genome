@@ -58,6 +58,10 @@ def main():
                         type=int,
                         default=1000,
                         help="number of epochs")
+    parser.add_argument('-batch_size',
+                        type=int,
+                        default=128,
+                        help="batch size [32, 64, 128, 256]")
     parser.add_argument('-hidden_sizes',
                         type=int,
                         default=50,
@@ -87,12 +91,13 @@ def main():
     drop_sizes = [args.dropout_1, args.dropout_2]
 
     experiment += ('ep_' + str(args.n_epochs) +
-                    '_hi_' + str(n_hidden) +
-                        '_dr_' + str(drop_sizes))
+                    '_bs_' + str(args.batch_size) +
+                        '_hi_' + str(n_hidden) +
+                            '_dr_' + str(drop_sizes))
 
     print(experiment)
 
-    results = lm.execute(args.file_name, args.fold, n_hidden, args.n_epochs,
+    results = lm.execute(args.file_name, args.batch_size, args.fold, n_hidden, args.n_epochs,
                args.patience, args.use_embed_layer, drop_sizes)
 
     run_results(results, experiment, args.n_epochs)

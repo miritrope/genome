@@ -9,13 +9,14 @@ Step 2: Generate the embedding matrix (optional)
 ` python utils_helpers.py`
 
 Step 3: Train the network 
-` python run_tests.py -file_name your_file_name.pkl -n_epochs 1000 -use_embed_layer 0  -fold 1 -patience 100 -hidden_sizes 50 -dropout_1 0.8 -dropout_2 0.5 `
+` python run_tests.py -file_name your_file_name.pkl -batch_size 64 -n_epochs 1000 -use_embed_layer 0  -fold 1 -patience 100 -hidden_sizes 50 -dropout_1 0.8 -dropout_2 0.5 `
 
 Parameters:
 
 |  Name | Required | Type  | Description
 | ----- | -------- |------ |----------- |
 | file_name      | Required | str  | bases and labels  |
+| batch_size     | Required | int  | batch sizes [32, 64, 128, 256] |
 | n_epochs       | Required | int  | number of epochs  |
 | use_embed_layer| Required | int  | whether to use the auxiliary network  |
 | fold           | Optional | int  | which fold of the embedding layer dataset  |

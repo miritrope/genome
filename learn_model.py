@@ -12,9 +12,8 @@ import time
 _EPSILON = 10e-8
 
 
-def execute(raw_path, fold, hidden_sizes, n_epochs, patience, use_embed_layer, dropout_sizes):
+def execute(raw_path, batch_size, fold, hidden_sizes, n_epochs, patience, use_embed_layer, dropout_sizes):
     dataset_path = 'data/'
-    batch_size = 128
     embedding_source = []
     if use_embed_layer:
         embedding_source = 'embed_4x26_fold'
