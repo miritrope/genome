@@ -26,7 +26,7 @@ def run_results(results, exp_name, n_epochs):
     epoch_times = results[5]
     train_time = results[6]
 
-    res_file_name = exp_name + ' test acc ' + f'{test_acc:.1f}'
+    res_file_name = exp_name + '_test_acc_' + f'{test_acc:.1f}'
 
     # save the results
     with open(res_file_name + '.pkl', 'wb') as f:
@@ -70,26 +70,29 @@ def main():
                         type=float,
                         default=0.5,
                         help="dropout hidden layer 2")
-
+    parser.add_argument('-file_name',
+                        type=str,
+                        default='affy_6_biallelic_snps_maf005_thinned_aut_dataset.pkl',
+                        help="file name of the genome and labels")
     args = parser.parse_args()
 
     # define experiment name
     experiment = ''
     if args.use_embed_layer:
-        experiment += 'with '
+        experiment += 'with_'
     else:
-        experiment += 'without '
+        experiment += 'without_'
 
     n_hidden = [args.hidden_sizes, args.hidden_sizes]
     drop_sizes = [args.dropout_1, args.dropout_2]
 
-    experiment += ('ep ' + str(args.n_epochs) +
-                    ' hi ' + str(n_hidden) +
-                        ' dr ' + str(drop_sizes))
+    experiment += ('ep_' + str(args.n_epochs) +
+                    '_hi_' + str(n_hidden) +
+                        '_dr_' + str(drop_sizes))
 
     print(experiment)
 
-    results = lm.execute(args.fold, n_hidden, args.n_epochs,
+    results = lm.execute(args.file_name, args.fold, n_hidden, args.n_epochs,
                args.patience, args.use_embed_layer, drop_sizes)
 
     run_results(results, experiment, args.n_epochs)

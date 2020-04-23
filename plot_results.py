@@ -13,7 +13,7 @@ def plot_results(plotme, n_epoch, pic_name):
     plt.ylabel('Loss')
 
     plt.xlim(0, n_epoch)
-    plt.ylim(0, 3)
+    plt.ylim(0, max(plotme[0]))
 
     plt.grid(True)
     plt.legend()

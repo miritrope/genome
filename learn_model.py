@@ -12,10 +12,9 @@ import time
 _EPSILON = 10e-8
 
 
-def execute(fold, hidden_sizes, n_epochs, patience, use_embed_layer, dropout_sizes):
-    raw_path = 'affy_6_biallelic_snps_maf005_thinned_aut_dataset.pkl'
+def execute(raw_path, fold, hidden_sizes, n_epochs, patience, use_embed_layer, dropout_sizes):
     dataset_path = 'data/'
-    batch_size = 64
+    batch_size = 128
     embedding_source = []
     if use_embed_layer:
         embedding_source = 'embed_4x26_fold'
@@ -23,12 +22,12 @@ def execute(fold, hidden_sizes, n_epochs, patience, use_embed_layer, dropout_siz
     learning_rate = 3e-5
     n_hidden_1 = hidden_sizes[0]
     n_hidden_2 = hidden_sizes[1]
-    n_targets = 26
 
     # print("Load data")
     x_train, y_train, x_valid, y_valid, x_test, y_test, \
     x_unsup, training_labels = mlh.load_data(dataset_path, raw_path, embedding_source, fold)
     n_feats = x_train.shape[1]
+    n_targets = training_labels.shape[1]
 
     embedding = []
 

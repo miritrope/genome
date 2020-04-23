@@ -1,6 +1,6 @@
 # Genomic classification using neural networks 
 Pytorch implementation of neural networks for genetic tests classification, inspired by the paper: [DietNetworks](https://arxiv.org/abs/1611.09340/).
-For further explanation please read my blog: "Bridging the gap between genetics and neural networks".
+For further explanation please read [my blog](https://medium.com/miritrope/bridging-the-gap-between-genetics-and-neural-networks-9bc65272c325): "Bridging the gap between genetics and neural networks".
  
 ## Usage
 Step 1: Follow the instructions in appendix B of the paper to download the data 

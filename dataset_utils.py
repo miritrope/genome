@@ -69,6 +69,8 @@ def load_1000_genomes(data_path, raw_path, norm=True, fold=0):
     train, valid = split([x, y], [0.75])
     # .75 train .25 valid
 
+    np.seterr(divide='ignore', invalid='ignore')
+
     if norm:
         mu = x.mean(axis=0)
         sigma = x.std(axis=0)
