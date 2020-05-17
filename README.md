@@ -1,6 +1,6 @@
 # Genetics Classification Using Neural Networks 
 _Pytorch_ Implementation for Genetics Classification. 
-For further reading please visit my blog: [Bridging the Gap Between Genetics and Neural Networks](https://medium.com/@miritrope_17849/bridging-the-gap-between-genetics-and-neural-networks-37563709537d)
+For further explanation please read my blog: [Bridging the Gap Between Genetics and Neural Networks](https://towardsdatascience.com/bridging-the-gap-between-genetics-and-neural-networks-4fdb91032f4b)
  
 ## Usage
 

@@ -191,5 +191,7 @@ def execute(raw_path, batch_size, fold, hidden_sizes, n_epochs, patience, use_em
     print('Test Accuracy (Overall): %2f%% (%2d/%2d)\t' % (
         test_acc, np.sum(class_correct), np.sum(class_total)))
 
+    torch.save(discrim_model, 'discrim_model.pt')
+    print('Saved the model: ', 'discrim_model.pt')
     return [train_losses, valid_losses, train_accs, valid_accs, test_acc, epoch_times, train_time]
 
